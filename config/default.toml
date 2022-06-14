@@ -1,0 +1,11 @@
+
+
+[http]
+port=8080
+publicUrl="http://localhost:8080/"
+
+[mongo]
+url="mongodb://localhost:27017/orders-development"
+
+[mqtt]
+url="mqtt://localhost/"
