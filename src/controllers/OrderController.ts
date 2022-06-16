@@ -1,5 +1,8 @@
-import OrderModel from '../models/OrderModel'
+import OrderModel, { IOrder } from '../models/OrderModel'
 import { Handler } from 'express'
+import client from '../mqtt'
+import { INotification } from '../models/NotificationModel'
+import shortid from 'shortid'
 
 export const getAll: Handler = async (req, res) => {
   const Orders = await OrderModel.find()
@@ -23,8 +26,20 @@ export const modify: Handler = async (req, res) => {
   }
 }
 
-export const processOrder = async (order: any) => {
-  console.log(order)
+export const processOrder = async (order: IOrder) => {
+  order._id = shortid()
+  order.state = 'validating'
+  const newOrder = new OrderModel(order)
+  await newOrder.save()
+  const notif:INotification = {
+    topic: 'restaurant/order',
+    body: {
+      msg: order._id
+    },
+    users: [order.restaurant.owner._id]
+  }
+  client.publish('notify', JSON.stringify(notif))
+  // console.log(order)
 }
 
 export default {

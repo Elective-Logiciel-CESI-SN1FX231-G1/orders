@@ -1,24 +1,19 @@
 import { Schema, model } from 'mongoose'
 
-type Role = 'client'| 'restaurateur'| 'deliverer'| 'developer'| 'commercial'| 'technician'| 'admin'
+export type Role = 'client'| 'restaurateur'| 'deliverer'| 'developer'| 'commercial'| 'technician'| 'admin'
+type State = 'completed'|'cancelled'|'delivering'|'preparating'|'validating'
 
-interface IUser {
+export interface IUser {
   _id: string,
   firstname: string,
   lastname: string,
   email: string,
-  password: string,
   phone: string,
   role: Role
 }
 
-interface IRestaurant {
-  owner: {
-    firstName: string,
-    lastName: string,
-    phone: string,
-    email: string
-  },
+export interface IRestaurant {
+  owner: IUser,
   name: string,
   description: string,
   address: string,
@@ -33,7 +28,7 @@ interface IRestaurant {
   isClosed: boolean
 }
 
-interface IProduct {
+export interface IProduct {
   name: string,
   price: number,
   description: string,
@@ -41,7 +36,7 @@ interface IProduct {
   restaurant: IRestaurant
 }
 
-interface IMenu {
+export interface IMenu {
   name: string,
   price: number,
   description: string,
@@ -50,9 +45,10 @@ interface IMenu {
   restaurant: IRestaurant
 }
 
-interface IOrder {
-  products: IProduct[]
-  menus: IMenu[]
+export interface IOrder {
+  _id: string,
+  products: IProduct[],
+  menus: IMenu[],
   price: number,
   deliveryPrice: number,
   commissionPrice: number,
@@ -64,8 +60,8 @@ interface IOrder {
     lon:number,
     lat:number
   },
-  state: string
-  deliverer: IUser,
+  state: State,
+  deliverer: IUser
 }
 
 const rawProductSchema = {
@@ -87,13 +83,17 @@ const rawMenuModel = {
   _id: { type: String, required: true }
 }
 
+const rawUser = {
+  _id: { type: String, required: true },
+  firstname: { type: String, required: true },
+  lastname: { type: String, required: true },
+  email: { type: String, required: true },
+  phone: { type: String, required: true },
+  role: { type: String, required: true }
+}
+
 const rawRestaurant = {
-  owner: {
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    phone: { type: String, required: true },
-    email: { type: String, required: true, unique: true }
-  },
+  owner: rawUser,
   name: { type: String, required: true },
   description: { type: String },
   address: { type: String, required: true },
@@ -112,16 +112,8 @@ const rawRestaurant = {
   _id: { type: String, required: true }
 }
 
-const rawUser = {
-  _id: { type: String, required: true },
-  firstname: { type: String, required: true },
-  lastname: { type: String, required: true },
-  email: { type: String, required: true },
-  phone: { type: String, required: true },
-  role: { type: String, required: true }
-}
-
 const OrderSchema = new Schema<IOrder>({
+  _id: { type: String, required: true },
   products: [rawProductSchema],
   menus: [rawMenuModel],
   price: { type: Number, required: true },
@@ -136,7 +128,7 @@ const OrderSchema = new Schema<IOrder>({
     lat: { type: Number, required: true }
   },
   state: { type: String, required: true },
-  deliverer: rawUser
+  deliverer: { type: rawUser, required: false }
 })
 
 export default model('Orders', OrderSchema)
