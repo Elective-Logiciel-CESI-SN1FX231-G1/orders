@@ -23,8 +23,13 @@ export const modify: Handler = async (req, res) => {
   }
 }
 
+export const processOrder = async (order: any) => {
+  console.log(order)
+}
+
 export default {
   getAll,
   getOne,
-  modify
+  modify,
+  processOrder
 }
