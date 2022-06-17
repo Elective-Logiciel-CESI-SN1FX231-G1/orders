@@ -60,7 +60,7 @@ export const processOrder = async (order: IOrder) => {
     },
     users: [order.restaurant.owner._id]
   }
-  client.publish('notify', JSON.stringify(notif))
+  await client.publish('notify', JSON.stringify(notif))
   // console.log(order)
 }
 
