@@ -64,9 +64,58 @@ export const processOrder = async (order: IOrder) => {
   // console.log(order)
 }
 
+export const acceptOrder: Handler = async (req, res) => {
+  const currentOrder = await OrderModel.findOne({ _id: req.params.id })
+  if (!currentOrder) return res.sendStatus(404)
+  if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(404)
+  if (currentOrder.status !== 'validating') return res.sendStatus(400)
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'preparating'})
+  return res.send(Order)
+}
+
+export const declineOrder: Handler = async (req, res) => {
+  const currentOrder = await OrderModel.findOne({ _id: req.params.id })
+  if (!currentOrder) return res.sendStatus(404)
+  if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(404)
+  if (currentOrder.status !== 'validating') return res.sendStatus(400)
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'cancelled'})
+  return res.send(Order)
+}
+
+export const readyOrder: Handler = async (req, res) => {
+  const currentOrder = await OrderModel.findOne({ _id: req.params.id })
+  if (!currentOrder) return res.sendStatus(404)
+  if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(404)
+  if (currentOrder.status !== 'preparating') return res.sendStatus(400)
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'waitingDelivery'})
+  return res.send(Order)
+}
+
+export const deliverOrder: Handler = async (req, res) => {
+  const currentOrder = await OrderModel.findOne({ _id: req.params.id })
+  if (!currentOrder) return res.sendStatus(404)
+  if (currentOrder.status !== 'waitingDelivery') return res.sendStatus(400)
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'delivering', deliverer: req.user })
+  return res.send(Order)
+}
+
+export const completedOrder: Handler = async (req, res) => {
+  const currentOrder = await OrderModel.findOne({ _id: req.params.id })
+  if (!currentOrder) return res.sendStatus(404)
+  if (req.user?._id !== currentOrder?.deliverer._id) return res.sendStatus(404)
+  if (currentOrder.status !== 'delivering') return res.sendStatus(400)
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'completed', deliverer: req.user })
+  return res.send(Order)
+}
+
 export default {
   getAll,
   getOne,
   modify,
-  processOrder
+  processOrder,
+  acceptOrder,
+  declineOrder,
+  readyOrder,
+  deliverOrder,
+  completedOrder
 }

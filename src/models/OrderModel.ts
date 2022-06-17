@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose'
 
 export type Role = 'client'| 'restaurateur'| 'deliverer'| 'developer'| 'commercial'| 'technician'| 'admin'
-type Status = 'completed'|'cancelled'|'delivering'|'preparating'|'validating'
+type Status = 'completed'|'cancelled'|'delivering'|'preparating'|'validating'|'waitingDelivery'
 
 export interface IUser {
   _id: string,
