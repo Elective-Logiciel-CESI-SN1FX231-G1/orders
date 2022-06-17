@@ -4,9 +4,31 @@ import client from '../mqtt'
 import { INotification } from '../models/NotificationModel'
 import shortid from 'shortid'
 
+enum params {
+  'status',
+  'restaurant',
+  'client'
+}
+
 export const getAll: Handler = async (req, res) => {
-  const Orders = await OrderModel.find()
-  res.send(Orders)
+  let invalidParam = false
+  for (const param in req.query) {
+    if (!Object.values(params).includes(param)) invalidParam = true
+  }
+  if(!invalidParam){
+    let newQuery = new Map()
+    if (req.query.client){
+      newQuery.set('client._id', req.query.client)
+    }
+    if (req.query.restaurant){
+      newQuery.set('restaurant._id', req.query.restaurant)
+    }
+    const Orders = await OrderModel.find(Object.fromEntries(newQuery))
+    res.send(Orders)
+  }
+  else {
+    res.status(400).send('Invalid Params')
+  }
 }
 
 export const getOne: Handler = async (req, res) => {
@@ -28,7 +50,7 @@ export const modify: Handler = async (req, res) => {
 
 export const processOrder = async (order: IOrder) => {
   order._id = shortid()
-  order.state = 'validating'
+  order.status = 'validating'
   const newOrder = new OrderModel(order)
   await newOrder.save()
   const notif:INotification = {
