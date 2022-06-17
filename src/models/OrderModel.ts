@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose'
 
 export type Role = 'client'| 'restaurateur'| 'deliverer'| 'developer'| 'commercial'| 'technician'| 'admin'
-type State = 'completed'|'cancelled'|'delivering'|'preparating'|'validating'
+type Status = 'completed'|'cancelled'|'delivering'|'preparating'|'validating'
 
 export interface IUser {
   _id: string,
@@ -60,7 +60,7 @@ export interface IOrder {
     lon:number,
     lat:number
   },
-  state: State,
+  status: Status,
   deliverer: IUser
 }
 
@@ -127,7 +127,7 @@ const OrderSchema = new Schema<IOrder>({
     lon: { type: Number, required: true },
     lat: { type: Number, required: true }
   },
-  state: { type: String, required: true },
+  status: { type: String, required: true },
   deliverer: { type: rawUser, required: false }
 })
 
