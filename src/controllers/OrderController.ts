@@ -4,31 +4,19 @@ import client from '../mqtt'
 import { INotification } from '../models/NotificationModel'
 import shortid from 'shortid'
 
-enum params {
-  'status',
-  'restaurant',
-  'client'
-}
-
 export const getAll: Handler = async (req, res) => {
-  let invalidParam = false
-  for (const param in req.query) {
-    if (!Object.values(params).includes(param)) invalidParam = true
-  }
-  if(!invalidParam){
-    let newQuery = new Map()
-    if (req.query.client){
-      newQuery.set('client._id', req.query.client)
-    }
-    if (req.query.restaurant){
-      newQuery.set('restaurant._id', req.query.restaurant)
-    }
-    const Orders = await OrderModel.find(Object.fromEntries(newQuery))
-    res.send(Orders)
-  }
-  else {
-    res.status(400).send('Invalid Params')
-  }
+  const query: any = {}
+  if (req.user?.role === 'client') query['client._id'] = req.user._id
+  if (req.user?.role === 'restaurateur') query['restaurant.owner._id'] = req.user._id
+  if (typeof (req.query.status) === 'string') query.status = { $in: req.query.status.split(',') }
+  const [results, count] = await Promise.all([
+    OrderModel.find(query).skip(req.pagination.skip).limit(req.pagination.size).exec(),
+    OrderModel.countDocuments(query).exec()
+  ])
+  res.send({
+    count,
+    results
+  })
 }
 
 export const getOne: Handler = async (req, res) => {
@@ -69,7 +57,7 @@ export const acceptOrder: Handler = async (req, res) => {
   if (!currentOrder) return res.sendStatus(404)
   if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(404)
   if (currentOrder.status !== 'validating') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'preparating'})
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'preparating' })
   return res.send(Order)
 }
 
@@ -78,7 +66,7 @@ export const declineOrder: Handler = async (req, res) => {
   if (!currentOrder) return res.sendStatus(404)
   if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(404)
   if (currentOrder.status !== 'validating') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'cancelled'})
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'cancelled' })
   return res.send(Order)
 }
 
@@ -87,7 +75,7 @@ export const readyOrder: Handler = async (req, res) => {
   if (!currentOrder) return res.sendStatus(404)
   if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(404)
   if (currentOrder.status !== 'preparating') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'waitingDelivery'})
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'waitingDelivery' })
   return res.send(Order)
 }
 

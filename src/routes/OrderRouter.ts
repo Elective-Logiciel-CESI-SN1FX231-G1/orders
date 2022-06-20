@@ -1,9 +1,10 @@
 import express from 'express'
 import { restrictedToRoles } from '../auth'
 import OrderController from '../controllers/OrderController'
+import paginate from '../utils/pagination'
 const OrderRouter = express.Router()
 
-OrderRouter.get('/', OrderController.getAll)
+OrderRouter.get('/', paginate, OrderController.getAll)
 
 OrderRouter.get('/:id', OrderController.getOne)
 
