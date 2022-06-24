@@ -23,9 +23,9 @@ export const getAll: Handler = async (req, res) => {
 
 export const getOne: Handler = async (req, res) => {
   const Order = await OrderModel.findOne({ _id: req.params.id })
-  if (req.user?.role === 'client' && req.user._id !== Order?.client._id) return res.sendStatus(401)
-  if (req.user?.role === 'deliverer' && req.user._id !== Order?.deliverer._id) return res.sendStatus(401)
-  if (req.user?.role === 'restaurateur' && req.user._id !== Order?.restaurant.owner._id) return res.sendStatus(401)
+  if (req.user?.role === 'client' && req.user._id !== Order?.client._id) return res.sendStatus(403)
+  if (req.user?.role === 'deliverer' && req.user._id !== Order?.deliverer._id) return res.sendStatus(403)
+  if (req.user?.role === 'restaurateur' && req.user._id !== Order?.restaurant.owner._id) return res.sendStatus(403)
   if (Order) res.send(Order)
   else res.status(404).send('Order Not Found')
 }
@@ -49,7 +49,7 @@ export const processOrder = async (order: IOrder) => {
 export const acceptOrder: Handler = async (req, res) => {
   const currentOrder = await OrderModel.findOne({ _id: req.params.id })
   if (!currentOrder) return res.sendStatus(404)
-  if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(404)
+  if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(403)
   if (currentOrder.status !== 'validating') return res.sendStatus(400)
   const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'preparating' })
   return res.send(Order)
@@ -58,7 +58,7 @@ export const acceptOrder: Handler = async (req, res) => {
 export const declineOrder: Handler = async (req, res) => {
   const currentOrder = await OrderModel.findOne({ _id: req.params.id })
   if (!currentOrder) return res.sendStatus(404)
-  if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(404)
+  if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(403)
   if (currentOrder.status !== 'validating') return res.sendStatus(400)
   const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'cancelled' })
   return res.send(Order)
@@ -67,7 +67,7 @@ export const declineOrder: Handler = async (req, res) => {
 export const readyOrder: Handler = async (req, res) => {
   const currentOrder = await OrderModel.findOne({ _id: req.params.id })
   if (!currentOrder) return res.sendStatus(404)
-  if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(404)
+  if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(403)
   if (currentOrder.status !== 'preparating') return res.sendStatus(400)
   const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'waitingDelivery' })
   return res.send(Order)
@@ -84,7 +84,7 @@ export const deliverOrder: Handler = async (req, res) => {
 export const completedOrder: Handler = async (req, res) => {
   const currentOrder = await OrderModel.findOne({ _id: req.params.id })
   if (!currentOrder) return res.sendStatus(404)
-  if (req.user?._id !== currentOrder?.deliverer._id) return res.sendStatus(404)
+  if (req.user?._id !== currentOrder?.deliverer._id) return res.sendStatus(403)
   if (currentOrder.status !== 'delivering') return res.sendStatus(400)
   const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'completed', deliverer: req.user })
   return res.send(Order)
