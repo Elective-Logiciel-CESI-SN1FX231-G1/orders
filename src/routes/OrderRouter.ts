@@ -8,8 +8,6 @@ OrderRouter.get('/', authNeeded, paginate, OrderController.getAll)
 
 OrderRouter.get('/:id', authNeeded, OrderController.getOne)
 
-OrderRouter.patch('/:id', authNeeded, express.json(), OrderController.modify)
-
 OrderRouter.post('/:id/accept', restrictedToRoles('restaurateur'), OrderController.acceptOrder)
 
 OrderRouter.post('/:id/decline', restrictedToRoles('restaurateur'), OrderController.declineOrder)
