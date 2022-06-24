@@ -1,14 +1,14 @@
 import express from 'express'
-import { restrictedToRoles } from '../auth'
+import { authNeeded, restrictedToRoles } from '../auth'
 import OrderController from '../controllers/OrderController'
 import paginate from '../utils/pagination'
 const OrderRouter = express.Router()
 
-OrderRouter.get('/', paginate, OrderController.getAll)
+OrderRouter.get('/', authNeeded, paginate, OrderController.getAll)
 
-OrderRouter.get('/:id', OrderController.getOne)
+OrderRouter.get('/:id', authNeeded, OrderController.getOne)
 
-OrderRouter.patch('/:id', express.json(), OrderController.modify)
+OrderRouter.patch('/:id', authNeeded, express.json(), OrderController.modify)
 
 OrderRouter.post('/:id/accept', restrictedToRoles('restaurateur'), OrderController.acceptOrder)
 

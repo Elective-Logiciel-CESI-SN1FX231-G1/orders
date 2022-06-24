@@ -26,6 +26,9 @@ export const getOne: Handler = async (req, res) => {
 }
 
 export const modify: Handler = async (req, res) => {
+  const oldOrder = await OrderModel.findOne({ _id: req.params.id })
+  if (!oldOrder) return res.sendStatus(404)
+  if (oldOrder.restaurant.owner._id !== req.user?._id) return res.sendStatus(401)
   try {
     const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { $set: req.body }, { new: true })
     if (Order) res.send(Order)
