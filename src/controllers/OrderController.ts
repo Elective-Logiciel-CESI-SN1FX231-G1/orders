@@ -3,11 +3,13 @@ import { Handler } from 'express'
 import client from '../mqtt'
 import { INotification } from '../models/NotificationModel'
 import shortid from 'shortid'
+import { FilterQuery } from 'mongoose'
 
 export const getAll: Handler = async (req, res) => {
-  const query: any = {}
+  const query: FilterQuery<IOrder> = {}
   if (req.user?.role === 'client') query['client._id'] = req.user._id
   if (req.user?.role === 'restaurateur') query['restaurant.owner._id'] = req.user._id
+  if (req.user?.role === 'deliverer') query['deliverer._id'] = req.user._id
   if (typeof (req.query.status) === 'string') query.status = { $in: req.query.status.split(',') }
   const [results, count] = await Promise.all([
     OrderModel.find(query).skip(req.pagination.skip).limit(req.pagination.size).exec(),
@@ -21,22 +23,11 @@ export const getAll: Handler = async (req, res) => {
 
 export const getOne: Handler = async (req, res) => {
   const Order = await OrderModel.findOne({ _id: req.params.id })
+  if (req.user?.role === 'client' && req.user._id !== Order?.client._id) return res.sendStatus(401)
+  if (req.user?.role === 'deliverer' && req.user._id !== Order?.deliverer._id) return res.sendStatus(401)
+  if (req.user?.role === 'restaurateur' && req.user._id !== Order?.restaurant.owner._id) return res.sendStatus(401)
   if (Order) res.send(Order)
   else res.status(404).send('Order Not Found')
-}
-
-export const modify: Handler = async (req, res) => {
-  const oldOrder = await OrderModel.findOne({ _id: req.params.id })
-  if (!oldOrder) return res.sendStatus(404)
-  if (oldOrder.restaurant.owner._id !== req.user?._id) return res.sendStatus(401)
-  try {
-    const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { $set: req.body }, { new: true })
-    if (Order) res.send(Order)
-    else res.status(404).send('Order Not Found')
-  } catch (err) {
-    if (err instanceof Error && err.message) res.status(400).send(err.message)
-    else throw err
-  }
 }
 
 export const processOrder = async (order: IOrder) => {
@@ -102,7 +93,6 @@ export const completedOrder: Handler = async (req, res) => {
 export default {
   getAll,
   getOne,
-  modify,
   processOrder,
   acceptOrder,
   declineOrder,
