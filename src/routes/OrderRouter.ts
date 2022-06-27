@@ -4,11 +4,9 @@ import OrderController from '../controllers/OrderController'
 import paginate from '../utils/pagination'
 const OrderRouter = express.Router()
 
-OrderRouter.get('/', paginate, OrderController.getAll)
+OrderRouter.get('/', restrictedToRoles(['client', 'restaurateur', 'deliverer', 'commercial', 'technician']), paginate, OrderController.getAll)
 
-OrderRouter.get('/:id', OrderController.getOne)
-
-OrderRouter.patch('/:id', express.json(), OrderController.modify)
+OrderRouter.get('/:id', restrictedToRoles(['client', 'restaurateur', 'deliverer', 'commercial', 'technician']), OrderController.getOne)
 
 OrderRouter.post('/:id/accept', restrictedToRoles('restaurateur'), OrderController.acceptOrder)
 
