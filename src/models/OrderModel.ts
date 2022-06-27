@@ -79,7 +79,7 @@ const rawMenuModel = {
   description: { type: String, required: true },
   image: { type: String, required: true },
   products: [rawProductSchema],
-  restaurant: { type: String, required: true, unique: true },
+  restaurant: { type: String, required: true },
   _id: { type: String, required: true }
 }
 
