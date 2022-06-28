@@ -14,7 +14,7 @@ OrderRouter.post('/:id/decline', restrictedToRoles('restaurateur'), OrderControl
 
 OrderRouter.post('/:id/ready', restrictedToRoles('restaurateur'), OrderController.readyOrder)
 
-OrderRouter.post('/:id/accept', restrictedToRoles('deliverer'), OrderController.acceptDelivererOrder)
+OrderRouter.post('/:id/delivererAccept', restrictedToRoles('deliverer'), OrderController.acceptDelivererOrder)
 
 OrderRouter.post('/:id/deliver', restrictedToRoles('deliverer'), OrderController.deliverOrder)
 

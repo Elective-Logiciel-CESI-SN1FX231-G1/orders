@@ -56,6 +56,7 @@ export interface IOrder {
   restaurant: IRestaurant,
   comment: string,
   address: string,
+  deliveringDate: string,
   position:{
     lon:number,
     lat:number
@@ -123,6 +124,7 @@ const OrderSchema = new Schema<IOrder>({
   restaurant: rawRestaurant,
   comment: { type: String, required: false },
   address: { type: String, required: true },
+  deliveringDate: { type: String, required: true },
   position: {
     lon: { type: Number, required: true },
     lat: { type: Number, required: true }
