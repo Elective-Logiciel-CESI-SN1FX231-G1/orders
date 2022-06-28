@@ -378,7 +378,7 @@ OrderRouter.post('/:id/decline', restrictedToRoles('restaurateur'), OrderControl
  */
 OrderRouter.post('/:id/ready', restrictedToRoles('restaurateur'), OrderController.readyOrder)
 
-OrderRouter.post('/:id/accept', restrictedToRoles('deliverer'), OrderController.acceptDelivererOrder)
+OrderRouter.post('/:id/delivererAccept', restrictedToRoles('deliverer'), OrderController.acceptDelivererOrder)
 
 /**
  * @api {post} /orders/api/orders/:id Accept selected Order delivery
