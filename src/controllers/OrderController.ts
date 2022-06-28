@@ -9,7 +9,13 @@ export const getAll: Handler = async (req, res) => {
   const query: FilterQuery<IOrder> = {}
   if (req.user?.role === 'client') query['client._id'] = req.user._id
   if (req.user?.role === 'restaurateur') query['restaurant.owner._id'] = req.user._id
-  // if (req.user?.role === 'deliverer') query['deliverer._id'] = req.user._id
+  //  if (req.user?.role === 'deliverer') query['deliverer._id'] = req.user._id
+  if (req.user?.role === 'deliverer') {
+    query.$or = [
+      { 'deliverer._id': req.user._id },
+      { 'deliverer._id': { $exists: false }, status: { $in: ['preparating', 'waitingDelivery'] } }
+    ]
+  }
   if (typeof (req.query.status) === 'string') query.status = { $in: req.query.status.split(',') }
   const [results, count] = await Promise.all([
     OrderModel.find(query).skip(req.pagination.skip).limit(req.pagination.size).exec(),
