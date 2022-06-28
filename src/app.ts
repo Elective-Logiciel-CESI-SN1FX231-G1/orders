@@ -6,6 +6,7 @@ import { auth } from './auth'
 const app = express()
 
 app.use(auth)
+app.use('/api', express.static('apidoc'))
 app.use('/api/orders', OrderRouter)
 
 export default app
