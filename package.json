@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "build-doc": "apidoc -i src -o apidoc"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,7 @@
   },
   "homepage": "https://github.com/Elective-Logiciel-CESI-SN1FX231-G1/orders#readme",
   "dependencies": {
+    "apidoc": "^0.51.1",
     "async-mqtt": "^2.6.2",
     "axios": "^0.27.2",
     "config": "^3.3.7",
