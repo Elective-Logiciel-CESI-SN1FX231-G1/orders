@@ -15,6 +15,8 @@ export const getAll: Handler = async (req, res) => {
       { 'deliverer._id': req.user._id },
       { 'deliverer._id': { $exists: false }, status: { $in: ['preparating', 'waitingDelivery'] } }
     ]
+    if (req.query.deliverer === 'me') query['deliverer._id'] = req.user?._id
+    if (req.query.deliverer === 'none') query['deliverer._id'] = { $exists: false }
   }
   if (typeof (req.query.status) === 'string') query.status = { $in: req.query.status.split(',') }
   const [results, count] = await Promise.all([
@@ -70,10 +72,10 @@ export const declineOrder: Handler = async (req, res) => {
 }
 
 export const acceptDelivererOrder: Handler = async (req, res) => {
-  const currentOrder = await OrderModel.findOne({ _id: req.params.id })
+  const currentOrder = await OrderModel.findOne({ _id: req.params.id, deliverer: { $exists: false } })
   if (!currentOrder) return res.sendStatus(404)
   if (currentOrder.status !== 'preparating' && currentOrder.status !== 'waitingDelivery') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { deliverer: req.user })
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id, deliverer: { $exists: false } }, { deliverer: req.user })
   return res.send(Order)
 }
 
