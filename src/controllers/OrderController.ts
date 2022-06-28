@@ -5,11 +5,14 @@ import { INotification } from '../models/NotificationModel'
 import shortid from 'shortid'
 import { FilterQuery } from 'mongoose'
 
+function getRandomNumber () {
+  return Math.floor(Math.random() * (999999 - 100000 + 1) + 100000)
+}
+
 export const getAll: Handler = async (req, res) => {
   const query: FilterQuery<IOrder> = {}
   if (req.user?.role === 'client') query['client._id'] = req.user._id
   if (req.user?.role === 'restaurateur') query['restaurant.owner._id'] = req.user._id
-  //  if (req.user?.role === 'deliverer') query['deliverer._id'] = req.user._id
   if (req.user?.role === 'deliverer') {
     query.$or = [
       { 'deliverer._id': req.user._id },
@@ -92,7 +95,7 @@ export const deliverOrder: Handler = async (req, res) => {
   const currentOrder = await OrderModel.findOne({ _id: req.params.id })
   if (!currentOrder) return res.sendStatus(404)
   if (currentOrder.status !== 'waitingDelivery') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'delivering' })
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'delivering', validationCode: getRandomNumber() })
   return res.send(Order)
 }
 

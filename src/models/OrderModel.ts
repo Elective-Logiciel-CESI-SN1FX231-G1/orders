@@ -62,7 +62,8 @@ export interface IOrder {
     lat:number
   },
   status: Status,
-  deliverer: IUser
+  deliverer: IUser,
+  validationCode: string
 }
 
 const rawProductSchema = {
@@ -130,7 +131,8 @@ const OrderSchema = new Schema<IOrder>({
     lat: { type: Number, required: true }
   },
   status: { type: String, required: true },
-  deliverer: { type: rawUser, required: false }
+  deliverer: { type: rawUser, required: false },
+  validationCode: { type: String, required: false }
 })
 
 export default model('Orders', OrderSchema)
