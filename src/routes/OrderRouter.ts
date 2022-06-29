@@ -5,13 +5,14 @@ import paginate from '../utils/pagination'
 const OrderRouter = express.Router()
 
 /**
- * @api {get} /orders/api/orders/:id Request Orders information
+ * @api {get} /orders/api/orders/ Request Orders information
  * @apiName GetAll
  * @apiGroup Order
  *
  * @apiQuery {Number} size=10 Number of elements per page.
  * @apiQuery {Number} skip=0 Number of elements to skip.
  * @apiQuery {Number} page=1 The page to get.
+ * @apiQuery {String} status="completed,cancelled,delivering,preparating,validating,waitingDelivery" Status of requested orders separated by a coma.
  *
  * @apiSuccess {Number} count Number of restaurants returned.
  * @apiSuccess {Array} results Array of restaurants.
