@@ -9,6 +9,10 @@ const OrderRouter = express.Router()
  * @apiName GetAll
  * @apiGroup Order
  *
+ * @apiQuery {Number} size=10 Number of elements per page.
+ * @apiQuery {Number} skip=0 Number of elements to skip.
+ * @apiQuery {Number} page=1 The page to get.
+ *
  * @apiSuccess {Number} count Number of restaurants returned.
  * @apiSuccess {Array} results Array of restaurants.
  * @apiSuccess {Array} results.products List of products.
