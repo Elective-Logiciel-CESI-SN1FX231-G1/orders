@@ -1,8 +1,9 @@
-
+[auth]
+verifyUrl="http://localhost:8080/auth/api/auth/verify"
 
 [http]
-port=8080
-publicUrl="http://localhost:8080/"
+port=44300
+publicUrl="http://localhost:8080/orders"
 
 [mongo]
 url="mongodb://localhost:27017/orders-development"

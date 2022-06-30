@@ -1,11 +1,12 @@
 {
   "name": "orders",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "",
   "main": "src/index.ts",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "build-doc": "apidoc -i src -o apidoc"
   },
   "repository": {
     "type": "git",
@@ -18,16 +19,20 @@
   },
   "homepage": "https://github.com/Elective-Logiciel-CESI-SN1FX231-G1/orders#readme",
   "dependencies": {
+    "apidoc": "^0.51.1",
+    "async-mqtt": "^2.6.2",
+    "axios": "^0.27.2",
     "config": "^3.3.7",
     "express": "^4.18.1",
     "express-async-errors": "^3.1.1",
     "mongoose": "^6.3.8",
-    "mqtt": "^4.3.7",
+    "shortid": "^2.2.16",
     "toml": "^3.0.0"
   },
   "devDependencies": {
     "@types/config": "^0.0.41",
     "@types/express": "^4.17.13",
+    "@types/shortid": "^0.0.29",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "eslint": "^8.17.0",
