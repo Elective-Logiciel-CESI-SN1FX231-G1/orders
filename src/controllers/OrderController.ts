@@ -94,11 +94,18 @@ export const acceptDelivererOrder: Handler = async (req, res) => {
   const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id, deliverer: { $exists: false } }, { deliverer: req.user }, { new: true })
   const notif:INotification = {
     body: {
-      msg: `${Order?.deliverer.firstname} ${Order?.deliverer.lastname} va venir chercher la commande de ${Order?.client.firstname} ${Order?.client.lastname}`
+      msg: `${Order?.deliverer.firstname} va venir chercher la commande de ${Order?.client.firstname}`
     },
     user: Order?.restaurant.owner._id
   }
   await client.publish('notify', JSON.stringify(notif))
+  const notif2:INotification = {
+    body: {
+      msg: `${Order?.deliverer.firstname} va s'occuper de votre commande`
+    },
+    user: Order?.client._id
+  }
+  await client.publish('notify', JSON.stringify(notif2))
   return res.send(Order)
 }
 
@@ -118,7 +125,7 @@ export const readyOrder: Handler = async (req, res) => {
   if (Order?.deliverer) {
     const notif2:INotification = {
       body: {
-        msg: `La commande de ${Order?.client.firstname} ${Order?.client.lastname} est prête`
+        msg: `La commande de ${Order?.client.firstname} est prête`
       },
       user: Order?.deliverer._id
     }
