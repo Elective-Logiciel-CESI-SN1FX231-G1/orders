@@ -47,11 +47,10 @@ export const processOrder = async (order: IOrder) => {
   const newOrder = new OrderModel(order)
   await newOrder.save()
   const notif:INotification = {
-    topic: 'restaurant/order',
     body: {
-      msg: order._id
+      msg: 'Nouvelle commande'
     },
-    users: [order.restaurant.owner._id]
+    user: order.restaurant.owner._id
   }
   await client.publish('notify', JSON.stringify(notif))
 }
@@ -61,7 +60,14 @@ export const acceptOrder: Handler = async (req, res) => {
   if (!currentOrder) return res.sendStatus(404)
   if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(403)
   if (currentOrder.status !== 'validating') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'preparating' })
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'preparating' }, { new: true })
+  const notif:INotification = {
+    body: {
+      msg: 'Votre commande est en cours de préparation'
+    },
+    user: Order?.client._id
+  }
+  await client.publish('notify', JSON.stringify(notif))
   return res.send(Order)
 }
 
@@ -70,7 +76,14 @@ export const declineOrder: Handler = async (req, res) => {
   if (!currentOrder) return res.sendStatus(404)
   if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(403)
   if (currentOrder.status !== 'validating') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'cancelled' })
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'cancelled' }, { new: true })
+  const notif:INotification = {
+    body: {
+      msg: 'Votre commande a été annulée'
+    },
+    user: Order?.client._id
+  }
+  await client.publish('notify', JSON.stringify(notif))
   return res.send(Order)
 }
 
@@ -78,7 +91,14 @@ export const acceptDelivererOrder: Handler = async (req, res) => {
   const currentOrder = await OrderModel.findOne({ _id: req.params.id, deliverer: { $exists: false } })
   if (!currentOrder) return res.sendStatus(404)
   if (currentOrder.status !== 'preparating' && currentOrder.status !== 'waitingDelivery') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id, deliverer: { $exists: false } }, { deliverer: req.user })
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id, deliverer: { $exists: false } }, { deliverer: req.user }, { new: true })
+  const notif:INotification = {
+    body: {
+      msg: `${Order?.deliverer.firstname} ${Order?.deliverer.lastname} va venir chercher la commande de ${Order?.client.firstname} ${Order?.client.lastname}`
+    },
+    user: Order?.restaurant.owner._id
+  }
+  await client.publish('notify', JSON.stringify(notif))
   return res.send(Order)
 }
 
@@ -87,7 +107,23 @@ export const readyOrder: Handler = async (req, res) => {
   if (!currentOrder) return res.sendStatus(404)
   if (req.user?._id !== currentOrder?.restaurant.owner._id) return res.sendStatus(403)
   if (currentOrder.status !== 'preparating') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'waitingDelivery' })
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'waitingDelivery' }, { new: true })
+  const notif:INotification = {
+    body: {
+      msg: 'Votre commande est prête'
+    },
+    user: Order?.client._id
+  }
+  await client.publish('notify', JSON.stringify(notif))
+  if (Order?.deliverer) {
+    const notif2:INotification = {
+      body: {
+        msg: `La commande de ${Order?.client.firstname} ${Order?.client.lastname} est prête`
+      },
+      user: Order?.deliverer._id
+    }
+    await client.publish('notify', JSON.stringify(notif2))
+  }
   return res.send(Order)
 }
 
@@ -95,7 +131,14 @@ export const deliverOrder: Handler = async (req, res) => {
   const currentOrder = await OrderModel.findOne({ _id: req.params.id })
   if (!currentOrder) return res.sendStatus(404)
   if (currentOrder.status !== 'waitingDelivery') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'delivering', validationCode: getRandomNumber() })
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'delivering', validationCode: getRandomNumber() }, { new: true })
+  const notif:INotification = {
+    body: {
+      msg: 'Votre commande est en cours de livraison'
+    },
+    user: Order?.client._id
+  }
+  await client.publish('notify', JSON.stringify(notif))
   return res.send(Order)
 }
 
@@ -104,7 +147,14 @@ export const completedOrder: Handler = async (req, res) => {
   if (!currentOrder) return res.sendStatus(404)
   if (req.user?._id !== currentOrder?.deliverer._id) return res.sendStatus(403)
   if (currentOrder.status !== 'delivering') return res.sendStatus(400)
-  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'completed' })
+  const Order = await OrderModel.findOneAndUpdate({ _id: req.params.id }, { status: 'completed' }, { new: true })
+  const notif:INotification = {
+    body: {
+      msg: 'Votre commande est arrivée'
+    },
+    user: Order?.client._id
+  }
+  await client.publish('notify', JSON.stringify(notif))
   return res.send(Order)
 }
 
